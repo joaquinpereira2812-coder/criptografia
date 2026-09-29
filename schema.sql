@@ -5,5 +5,8 @@ CREATE TABLE IF NOT EXISTS users (
   username VARCHAR(50) NOT NULL UNIQUE,
   email VARCHAR(100) NOT NULL UNIQUE,
   password VARCHAR(255) NOT NULL,
+  telefono_cifrado TEXT NULL,
+  salt VARCHAR(64) NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+-- salt se conserva por compatibilidad con la guía; password_hash incluye su propia sal.
