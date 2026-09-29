@@ -2,6 +2,7 @@
 declare(strict_types=1);
 session_start();
 require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../config/crypto.php';
 function e(string $s): string { return htmlspecialchars($s, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); }
 $error = '';
 $success = '';
@@ -18,9 +19,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) $error = 'El correo electrónico no es válido.';
     else {
         try {
-            $stmt = $pdo->prepare('INSERT INTO users (username, email, password) VALUES (?, ?, ?)');
+            $stmt = $pdo->prepare('INSERT INTO users (username, email, password, telefono_cifrado) VALUES (?, ?, ?, ?)');
             // password_hash genera una sal única automáticamente y guarda el hash irreversible.
-            $stmt->execute([$username, $email, password_hash($password, PASSWORD_BCRYPT)]);
+            $stmt->execute([$username, $email, password_hash($password, PASSWORD_BCRYPT),
+                $telefono !== '' ? cifrarAES256($telefono) : null]);
             $success = 'Registro exitoso. Ya podés ingresar.';
         } catch (PDOException $ex) {
             $error = $ex->getCode() === '23000' ? 'El usuario o correo ya existe.' : 'No se pudo completar el registro.';
@@ -32,4 +34,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <main class="card narrow"><h1>Crear cuenta</h1>
 <?php if ($error): ?><p class="alert error"><?= e($error) ?></p><?php endif; ?>
 <?php if ($success): ?><p class="alert success"><?= e($success) ?></p><?php endif; ?>
-<form method="post"><label>Usuario<input name="username" maxlength="50" required value="<?= e($username ?? '') ?>"></label><label>Correo electrónico<input name="email" type="email" maxlength="100" required value="<?= e($email ?? '') ?>"></label><label>Contraseña<input name="password" type="password" minlength="6" required></label><label>Confirmar contraseña<input name="confirm_password" type="password" minlength="6" required></label><button>Registrarse</button></form><p class="link">¿Ya tenés cuenta? <a href="login.php">Ingresar</a></p></main></body></html>
+<form method="post"><label>Usuario<input name="username" maxlength="50" required value="<?= e($username ?? '') ?>"></label><label>Correo electrónico<input name="email" type="email" maxlength="100" required value="<?= e($email ?? '') ?>"></label><label>Contraseña<input name="password" type="password" minlength="6" required></label><label>Confirmar contraseña<input name="confirm_password" type="password" minlength="6" required></label><label>Teléfono (opcional)<input name="telefono" maxlength="40" value="<?= e($telefono ?? '') ?>"></label><button>Registrarse</button></form><p class="link">¿Ya tenés cuenta? <a href="login.php">Ingresar</a></p></main></body></html>
