@@ -2,6 +2,7 @@
 declare(strict_types=1);
 session_start();
 require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../config/crypto.php';
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim((string)($_POST['username'] ?? ''));
@@ -12,10 +13,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // password_verify contrasta la entrada con el hash y su sal incorporada.
     if ($user && password_verify($password, $user['password'])) {
         try {
+            $token = 'SESION_' . bin2hex(random_bytes(16));
+            $cifrado = cifrarRSA($token);
+            if (!hash_equals($token, descifrarRSA($cifrado))) throw new RuntimeException('Token inválido.');
             session_regenerate_id(true);
             $_SESSION['user_id'] = (int)$user['id'];
             $_SESSION['username'] = $user['username'];
             $_SESSION['login_time'] = date('Y-m-d H:i:s');
+            $_SESSION['token_rsa_cifrado'] = $cifrado;
+            $_SESSION['token_rsa_descifrado'] = $token; // Solo demostración académica; no compartir el token.
             header('Location: dashboard.php'); exit;
         } catch (RuntimeException $ex) { error_log($ex->getMessage()); $error = 'No se pudo iniciar la sesión segura. Revisá las claves RSA.'; }
     } else $error = 'Usuario o contraseña incorrectos.';

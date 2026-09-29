@@ -39,3 +39,19 @@ function descifrarAES256(string $cadenaBase64): string {
     return $texto;
 }
 
+function cifrarRSA(string $mensaje): string {
+    $publica = @file_get_contents(__DIR__ . '/publica.key');
+    if ($publica === false || !openssl_public_encrypt($mensaje, $cifrado, $publica, OPENSSL_PKCS1_OAEP_PADDING)) {
+        throw new RuntimeException('No se pudo cifrar el token RSA. Genere las claves primero.');
+    }
+    return base64_encode($cifrado);
+}
+
+function descifrarRSA(string $mensajeCifrado): string {
+    $privada = @file_get_contents(__DIR__ . '/privada.key');
+    $binario = base64_decode($mensajeCifrado, true);
+    if ($privada === false || $binario === false || !openssl_private_decrypt($binario, $texto, $privada, OPENSSL_PKCS1_OAEP_PADDING)) {
+        throw new RuntimeException('No se pudo descifrar el token RSA.');
+    }
+    return $texto;
+}
