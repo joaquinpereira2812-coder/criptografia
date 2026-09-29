@@ -1,0 +1,10 @@
+config/privada.key
+config/*.key
+!config/publica.key
+.env
+config/secrets.local.php
+*.log
+*.tmp
+.DS_Store
+.idea/
+.vscode/
