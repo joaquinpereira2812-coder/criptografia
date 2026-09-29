@@ -24,4 +24,4 @@ function e(string $s): string { return htmlspecialchars($s, ENT_QUOTES | ENT_SUB
 <section><h2>Sesión</h2><p>Usuario ID: <?= (int)$_SESSION['user_id'] ?><br>Inicio: <?= e((string)$_SESSION['login_time']) ?></p></section>
 <section><h2>Datos cifrados con AES-256-CBC</h2><p>Teléfono en BD: <code><?= e($user['telefono_cifrado'] ? substr($user['telefono_cifrado'], 0, 30) . '…' : 'N/A') ?></code></p><p>Teléfono descifrado: <strong><?= e($telefono) ?></strong></p></section>
 <section><h2>Token cifrado con RSA-2048</h2><p>Token cifrado: <code><?= e(substr((string)($_SESSION['token_rsa_cifrado'] ?? ''), 0, 30)) ?>…</code></p><p>Token descifrado (demostración): <code><?= e((string)($_SESSION['token_rsa_descifrado'] ?? 'N/A')) ?></code></p></section>
-</main></body></html>
+<p class="link"><a href="validar_integridad.php">Probar validación HMAC-SHA256</a></p></main></body></html>
